@@ -48,9 +48,22 @@ router.post('/login',
             next();
         }
     },
-    passport.authenticate('local'),
-    (req,res)=>{
-        res.json({message:'Logged in!'});
+    (req,res,next)=>{
+        passport.authenticate('local',(err,user)=>{
+            if(err){
+                return res.status(500).json({message:'Server error!'});
+            }
+            if(!user){
+                return res.status(401).json({message:'Invalid email or password!'});
+            }
+            req.login(user,(error)=>{
+                if(error){
+                    return res.status(500).json({message:'Login failed!'});
+                }else{
+                    return res.json({message:'Logged in!'});
+                }
+            });
+        })(req,res,next);
     }
 );
 
